@@ -111,7 +111,7 @@ class SingleStageCore(Core): # 单循环核 single cycle
             funt3 = instruction[17:20]
             rs1_v = self.myRF.readRF(int(instruction[12:17], base=2))
             rs2_v = self.myRF.readRF(int(instruction[7:12], base=2))
-            rd = instruction[20:25]
+            rd = int(instruction[20:25], base=2)
 
             if funt3 == '000':
                 if instruction[0:7] == '0000000':  # ADD
@@ -128,10 +128,9 @@ class SingleStageCore(Core): # 单循环核 single cycle
 
         elif opcode == '0010011':  # I type
             funt3 = instruction[17:20]
-            rs1_v = self.myRF.readRF(instruction[12:17])
-            print(rs1_v)
-            rd = instruction[20:25]
-            imm = instruction[0:12]
+            rs1_v = self.myRF.readRF(int(instruction[12:17], base=2))
+            rd = int(instruction[20:25], base=2)
+            imm = int(instruction[0:12], base=2)
             if funt3 == '000': # ADDI
                 self.myRF.writeRF(rd, rs1_v + imm)
             elif funt3 == '100': # XORI
@@ -142,17 +141,17 @@ class SingleStageCore(Core): # 单循环核 single cycle
                 self.myRF.writeRF(rd, rs1_v & imm)
 
         elif opcode == '1101111':  # J typr
-            rd = instruction[20:25]
+            rd = int(instruction[20:25], base=2)
             self.myRF.writeRF(rd, PC_next)
             PC_next = PC_value + \
-                instruction[0]+instruction[12:20]+instruction[11]+instruction[1:10]
+                int(instruction[0], base=2) + int(instruction[12:20], base=2) + int(instruction[11], base=2) + int(instruction[1:10], base=2)
 
         elif opcode == '1100011':  # B type
             funt3 = instruction[17:20]
             rs1_v = self.myRF.readRF(int(instruction[12:17], base=2))
             rs2_v = self.myRF.readRF(int(instruction[7:12], base=2))
-            imm = instruction[20:24] + instruction[1:7] + \
-                instruction[24] + instruction[0]
+            imm = int(instruction[20:24], base=2) + int(instruction[1:7], base=2) + \
+                int(instruction[24], base=2) + int(instruction[0], base=2)
             if funt3 == '000': # BEQ 
                 if rs1_v == rs2_v:
                     PC_next = PC_value + imm
@@ -165,20 +164,19 @@ class SingleStageCore(Core): # 单循环核 single cycle
                     PC_next = PC_next
 
         elif opcode == '0000011':  # I type Load
-            rd = instruction[20:25]
+            rd = int(instruction[20:25], base=2)
             rs1_v = self.myRF.readRF(int(instruction[12:17], base=2))
-            imm = instruction[0:12]
-            self.myRF.writeRF(int(rd, base=2), self.ext_dmem.readInstr(rs1_v + int(imm, base=2)))
+            imm = int(instruction[0:12], base=2)
+            self.myRF.writeRF(rd, self.ext_dmem.readInstr(rs1_v + imm))
 
         elif opcode == '0100011':  # S type
             rs1_v = self.myRF.readRF(int(instruction[12:17], base=2))
             rs2_v = self.myRF.readRF(int(instruction[7:12], base=2))
-            imm = instruction[0:7]+instruction[20:25]
-            self.ext_dmem.writeDataMem(rs1_v+imm, rs2_v)
+            imm = int(instruction[0:7], base=2) + int(instruction[20:25], base=2)
+            self.ext_dmem.writeDataMem(rs1_v + imm, rs2_v)
 
         else:  # Halt and other option
             self.state.IF["nop"] = True
-
 
 
         self.halted = True
